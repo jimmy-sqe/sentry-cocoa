@@ -1,5 +1,5 @@
-#import "SentryANRTracker.h"
 #import "SentryANRTrackingIntegration.h"
+#import "SentryANRTrackingIntegrationV2.h"
 #import "SentryAutoBreadcrumbTrackingIntegration.h"
 #import "SentryAutoSessionTrackingIntegration.h"
 #import "SentryCoreDataTrackingIntegration.h"
@@ -61,6 +61,7 @@ NSString *const kSentryDefaultEnvironment = @"production";
             NSStringFromClass([SentryWatchdogTerminationTrackingIntegration class]),
 #endif // SENTRY_HAS_UIKIT
             NSStringFromClass([SentryANRTrackingIntegration class]),
+            NSStringFromClass([SentryANRTrackingIntegrationV2 class]),
             NSStringFromClass([SentryAutoBreadcrumbTrackingIntegration class]),
             NSStringFromClass([SentryAutoSessionTrackingIntegration class]),
             NSStringFromClass([SentryCoreDataTrackingIntegration class]),
@@ -123,6 +124,7 @@ NSString *const kSentryDefaultEnvironment = @"production";
         self.enableAppHangTracking = YES;
         self.appHangTimeoutInterval = 2.0;
         self.enableAppHangTrackingV2 = NO;
+        self.enableReportNonFullyBlockingAppHangs = YES;
         self.enableAutoBreadcrumbTracking = YES;
         self.enableNetworkTracking = YES;
         self.enableFileIOTracing = YES;
@@ -444,6 +446,9 @@ NSString *const kSentryDefaultEnvironment = @"production";
     if ([options[@"appHangTimeoutInterval"] isKindOfClass:[NSNumber class]]) {
         self.appHangTimeoutInterval = [options[@"appHangTimeoutInterval"] doubleValue];
     }
+
+    [self setBool:options[@"enableReportNonFullyBlockingAppHangs"]
+            block:^(BOOL value) { self->_enableReportNonFullyBlockingAppHangs = value; }];
 
     [self setBool:options[@"enableAppHangTrackingV2"]
             block:^(BOOL value) { self->_enableAppHangTrackingV2 = value; }];

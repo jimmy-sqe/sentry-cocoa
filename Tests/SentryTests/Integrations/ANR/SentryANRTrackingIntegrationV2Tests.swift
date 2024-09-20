@@ -67,7 +67,7 @@ class SentryANRTrackingIntegrationV2Tests: SentrySDKIntegrationTestsBase {
         XCTAssertFalse(result)
     }
     
-    func testANRDetected_EventCaptured() throws {
+    func testANRDetected_FullyBlocking_EventCaptured() throws {
         givenInitializedTracker()
         setUpThreadInspector()
         
@@ -81,7 +81,44 @@ class SentryANRTrackingIntegrationV2Tests: SentrySDKIntegrationTestsBase {
             }
             
             XCTAssertEqual(ex.mechanism?.type, "AppHang")
-            XCTAssertEqual(ex.type, "App Hanging")
+            XCTAssertEqual(ex.type, "App Hanging Fully Blocked")
+            XCTAssertEqual(ex.value, "App hanging for at least 4500 ms.")
+            XCTAssertNotNil(ex.stacktrace)
+            XCTAssertEqual(ex.stacktrace?.frames.first?.function, "main")
+            XCTAssertEqual(ex.stacktrace?.snapshot?.boolValue, true)
+            XCTAssertEqual(try XCTUnwrap(event?.threads?.first).current?.boolValue, true)
+            XCTAssertEqual(event?.isAppHangEvent, true)
+            
+            guard let threads = event?.threads else {
+                XCTFail("ANR Exception not found")
+                return
+            }
+            
+            // Sometimes during tests its possible to have one thread without frames
+            // We just need to make sure we retrieve frame information for at least one other thread than the main thread
+            let threadsWithFrames = threads.filter {
+                ($0.stacktrace?.frames.count ?? 0) >= 1
+            }.count
+            
+            XCTAssertTrue(threadsWithFrames > 1, "Not enough threads with frames")
+        }
+    }
+    
+    func testANRDetected_NonFullyBlocked_EventCaptured() throws {
+        givenInitializedTracker()
+        setUpThreadInspector()
+        
+        Dynamic(sut).anrDetectedWithType(SentryANRType.nonFullyBlocking)
+        
+        try assertEventWithScopeCaptured { event, _, _ in
+            XCTAssertNotNil(event)
+            guard let ex = event?.exceptions?.first else {
+                XCTFail("ANR Exception not found")
+                return
+            }
+            
+            XCTAssertEqual(ex.mechanism?.type, "AppHang")
+            XCTAssertEqual(ex.type, "App Hanging Non Fully Blocked")
             XCTAssertEqual(ex.value, "App hanging for at least 4500 ms.")
             XCTAssertNotNil(ex.stacktrace)
             XCTAssertEqual(ex.stacktrace?.frames.first?.function, "main")

@@ -102,8 +102,22 @@ NS_ASSUME_NONNULL_BEGIN
     NSString *message = [NSString stringWithFormat:@"App hanging for at least %li ms.",
         (long)(self.options.appHangTimeoutInterval * 1000)];
     SentryEvent *event = [[SentryEvent alloc] initWithLevel:kSentryLevelError];
-    SentryException *sentryException =
-        [[SentryException alloc] initWithValue:message type:SentryANRExceptionTypeV2];
+
+    NSString *exceptionType;
+    switch (type) {
+    case SentryANRTypeFullyBlocking:
+        exceptionType = SentryANRExceptionTypeV2FullyBlocked;
+        break;
+    case SentryANRTypeNonFullyBlocking:
+        exceptionType = SentryANRExceptionTypeV2NonFullyBlocked;
+        break;
+    default:
+        exceptionType = SentryANRExceptionTypeV2FullyBlocked;
+        break;
+    }
+
+    SentryException *sentryException = [[SentryException alloc] initWithValue:message
+                                                                         type:exceptionType];
 
     sentryException.mechanism = [[SentryMechanism alloc] initWithType:@"AppHang"];
     sentryException.stacktrace = [threads[0] stacktrace];

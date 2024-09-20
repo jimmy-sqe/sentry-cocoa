@@ -8,7 +8,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-static NSString *const SentryANRExceptionTypeV2 = @"App Hanging";
+static NSString *const SentryANRExceptionTypeV2FullyBlocked = @"App Hanging Fully Blocked";
+static NSString *const SentryANRExceptionTypeV2NonFullyBlocked = @"App Hanging Non Fully Blocked";
 
 @interface SentryANRTrackingIntegrationV2
     : SentryBaseIntegration <SentryIntegrationProtocol, SentryANRTrackerV2Delegate>

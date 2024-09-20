@@ -1,4 +1,5 @@
 #import "SentryANRTrackingIntegration.h"
+#import "SentryANRTrackingIntegrationV2.h"
 #import "SentryBreadcrumb.h"
 #import "SentryClient.h"
 #import "SentryDebugMeta.h"
@@ -203,8 +204,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)isAppHangEvent
 {
-    return self.exceptions.count == 1 &&
-        [self.exceptions.firstObject.type isEqualToString:SentryANRExceptionType];
+    if (self.exceptions.count != 1) {
+        return NO;
+    }
+
+    return [self.exceptions.firstObject.type isEqualToString:SentryANRExceptionType] ||
+        [self.exceptions.firstObject.type isEqualToString:SentryANRExceptionTypeV2FullyBlocked] ||
+        [self.exceptions.firstObject.type isEqualToString:SentryANRExceptionTypeV2NonFullyBlocked];
 }
 
 @end
