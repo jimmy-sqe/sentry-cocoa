@@ -106,4 +106,8 @@ class SentryEventTests: XCTestCase {
     func testMessageIsNil() {
         XCTAssertNil(Event().message)
     }
+    
+    func testIsAppHangEvent_NonAppHangExceptionType_ReturnsFalse() {
+        XCTAssertFalse(Event().isAppHangEvent)
+    }
 }
