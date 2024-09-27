@@ -38,6 +38,9 @@
 // #define SentryCrashLogger_LocalLevel TRACE
 #include "SentryCrashLogger.h"
 
+// Added by Jimmy SQE
+#include <sys/_types/_ucontext64.h>
+
 #ifdef __arm64__
 #    define UC_MCONTEXT uc_mcontext64
 typedef ucontext64_t SignalUserContext;
